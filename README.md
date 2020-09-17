@@ -7,3 +7,11 @@ Please get the **run.sh** and **X.509 Public Certificate** files from our **Welc
 **X.509 Public Certificate** contains our Public Key that will be used to verify the JWS Signature & Payload.
 
 You will need these to launch the backend service.
+
+Next, place the **run.sh** file that you have received from our Developers' Pack (that comes with the API keys) to the root folder of the Flask application, and run the following commands:
+
+```
+sh install.sh
+sh run.sh
+```
+This will run the **backend** service.
