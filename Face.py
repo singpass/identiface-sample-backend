@@ -6,23 +6,15 @@ import json
 import jwcrypto.jwk as jwk
 import jwcrypto.jws as jws
 from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+from flask_limiter.util import get_remote_address, get_ipaddr
 
 import base64
-
-######### README #########
-# 'pw' is specifically for this
-# QuickStart environment only.
-# In actual production,
-# you'd want to protect
-# your backend API
-# with an API key
 
 app = Flask(__name__)
 CORS(app)
 
 # Rate limiter to prevent abuse
-limiter = Limiter(app, key_func=get_remote_address, default_limits=["3 per minute", "60 per hour", "300 per day"])
+limiter = Limiter(app, key_func=get_ipaddr, default_limits=["10 per minute", "100 per hour", "500 per day"])
 
 @app.errorhandler(404)
 def errorHandler(e):
@@ -45,18 +37,12 @@ BASE_URL = "https://stg-bio-api.singpass.gov.sg/api/v2/face"
 # USER SESSIONS will be { "S9911223A": [oauth_token, session_token] }
 USER_SESSIONS = {}
 
-@app.route("/face/test", methods=["GET"])
-@limiter.limit("1 per minute")
-def one():
-    return jsonify({"message": "ONE PER MINUTE ONLY"})
-
-def getAuthToken(pw=""):
+def getAuthToken():
     '''
     Gets OAuth 2.0 Token from SECRET and CLIENT_SECRET
 
     Parameters:
-    pw (String): Sample backend password to protect your API resource
-                 Note: Do not use plain passwords to secure your backend API. Use an API gateway.
+    -
     
     Returns:
     _Sample_
@@ -68,10 +54,6 @@ def getAuthToken(pw=""):
 
     try:
         data = request.get_json()
-        pw = data['pw']
-
-        # if pw != "ndi-api":
-        #     return jsonify({"type": "error", "status": "403", "message": "Unauthorised access"}), 403
     
     except:
         return jsonify({"type": "error", "status": "403", "message": "Unauthorised access"}), 403
@@ -173,8 +155,6 @@ def getFaceVerifyToken():
     user_id (String): NRIC/FIN number of the user
     service_id (String): Issued unique Service ID for your digital service
     transaction_type (String): Optional. Issued during developer's onboarding
-    
-    pw (String): Password to authenticate frontend (Only for QuickStart)
 
     Returns:
 
@@ -193,12 +173,8 @@ def getFaceVerifyToken():
 
     try:
         data = request.get_json()
-        pw = data['pw']
 
-        if pw != "ndi-api":
-            return jsonify({"type": "error", "status": "403", "message": "Unauthorised access"}), 403
-
-        response = getAuthToken(pw)
+        response = getAuthToken()
         r = response[0].json
 
         if r['type'] == "error":
@@ -284,8 +260,6 @@ def validateVerify():
     service_id (String): Issued unique Service ID for your digital service
     transaction_type (String): Optional. Issued during developer's onboarding
     token (String): faceVerify token issued
-    
-    pw (String): Password to authenticate frontend (Only for QuickStart)
 
     Returns:
 
@@ -297,11 +271,6 @@ def validateVerify():
 
     try:
         data = request.get_json()
-        pw = data['pw']
-
-        if pw != "ndi-api":
-            return jsonify({"type": "error", "status": "403", "message": "Unauthorised access"}), 403
-    
     except:
         return jsonify({"type": "error", "status": "403", "message": "Unauthorised access"}), 403
 
@@ -394,18 +363,14 @@ def faceCompare():
     try:
         # Retrieve POST data first
         data = request.get_json()
-        pw = data['pw']
 
-        response = getAuthToken(pw)
+        response = getAuthToken()
         r = response[0].json
 
         if r['type'] == "error":
             return r, 400
         else:
             oauth_token = r['oauth_token']
-
-        if pw != "ndi-api":
-            return jsonify({"type": "error", "status": "403", "message": "Unauthorised access"}), 403
     except:
         return jsonify({"type": "error", "status": "403", "message": "Unauthorised access"}), 403
 
