@@ -5,8 +5,8 @@ import requests
 import json
 import jwcrypto.jwk as jwk
 import jwcrypto.jws as jws
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address, get_ipaddr
+# from flask_limiter import Limiter
+# from flask_limiter.util import get_remote_address, get_ipaddr
 
 import base64
 
@@ -14,7 +14,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Rate limiter to prevent abuse
-limiter = Limiter(app, key_func=get_ipaddr, default_limits=["10 per minute", "100 per hour", "500 per day"])
+# limiter = Limiter(app, key_func=get_ipaddr, default_limits=["10 per minute", "100 per hour", "500 per day"])
 
 @app.errorhandler(404)
 def errorHandler(e):
